@@ -137,22 +137,55 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
-
+  const picture = document.createElement('picture');
   const image = document.createElement('img');
+  //3 different source tags
+  const sourceLarge = document.createElement('source');
+  const sourceMedium = document.createElement('source');
+  const sourceSmall = document.createElement('source');
+  const cropImgPath = '/destimg'; // Folder where the cropped images are
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  li.append(image);
+  image.alt = DBHelper.imageAltForRestaurant(restaurant);
+  image.tabIndex = 0;
+  const imgFileName = DBHelper.imageFileNameOfRestaurant(restaurant); // Just the Image name without extension
+  //Large,Medium and Small Image path
+  const imgLarge = (`${cropImgPath}/${imgFileName}_large.jpg`);
+  const imgMedium = (`${cropImgPath}/${imgFileName}_medium.jpg`);
+  const imgSmall = (`${cropImgPath}/${imgFileName}_small.jpg`);
+  //3 different viewports - 3 different media attribute for source
+  const mediaLarge = '(min-width: 960px)';
+  const mediaMedium = '(min-width: 600px)';
+  const mediaSmall = '(min-width: 300px)';
+  //adding attributes to source tag
+  sourceLarge.media = mediaLarge;
+  sourceLarge.srcset = imgLarge;
+  sourceMedium.media = mediaMedium;
+  sourceMedium.srcset = imgMedium;
+  sourceSmall.media = mediaSmall;
+  sourceSmall.srcset = imgSmall;
+  
+  li.role = 'listitem';
+  li.append(picture);
+  picture.append(sourceLarge);
+  picture.append(sourceMedium);
+  picture.append(sourceSmall);
+  picture.append(image);
 
   const name = document.createElement('h1');
   name.innerHTML = restaurant.name;
+  name.role = 'heading';
+  name.tabIndex = 0;
   li.append(name);
 
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
+  neighborhood.tabIndex = 0;
   li.append(neighborhood);
 
   const address = document.createElement('p');
   address.innerHTML = restaurant.address;
+  address.tabIndex = 0;
   li.append(address);
 
   const more = document.createElement('a');

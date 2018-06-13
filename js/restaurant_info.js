@@ -58,6 +58,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  
+  const imgFileName = DBHelper.imageFileNameOfRestaurant(restaurant);// Just the Image name without extension
+  const cropImgPath = '/destimg'; // Folder where the cropped images are
+  image.srcset = (`${cropImgPath}/${imgFileName}_medium.jpg 1000w, ${cropImgPath}/${imgFileName}_small.jpg 500w`);
+  image.alt = DBHelper.imageAltForRestaurant(restaurant);
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -119,10 +124,12 @@ createReviewHTML = (review) => {
   const li = document.createElement('li');
   const name = document.createElement('p');
   name.innerHTML = review.name;
+  li.tabIndex = 0;
   li.appendChild(name);
 
   const date = document.createElement('p');
   date.innerHTML = review.date;
+  li.tabIndex = 0;
   li.appendChild(date);
 
   const rating = document.createElement('p');
