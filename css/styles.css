@@ -142,10 +142,9 @@ nav h1 a {
 /* ====================== Restaurant Listing ====================== */
 #restaurants-list {
   background-color: #f3f3f3;
-  float: left;
   /*adding the diaplay to be flex */
- /* display: flex;
-  flex-wrap: wrap; */
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   list-style: outside none none;
   margin: auto; /* changing margin to auto from 0*/
@@ -154,7 +153,6 @@ nav h1 a {
 }
 #restaurants-list li {
   background-color: #fff;
-  float: left;
   border: 2px solid #ccc;
   font-family: Arial,sans-serif;
   margin: auto; /*changing margin to auto from 15 */
@@ -305,6 +303,7 @@ nav h1 a {
     margin-left: auto;
     margin-right: auto;
   }
+  
 }
 @media screen and (max-width: 460px) {
     #map {

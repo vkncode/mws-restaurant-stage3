@@ -1,8 +1,10 @@
 const staticCacheName = 'restaurant-review-v1';
 const urlsToCache = [
   'index.html',
+  'restaurant.html',
   '/destimg',
-  '/img'
+  '/img',
+  '/data',
 ];
 
 //adding cache
