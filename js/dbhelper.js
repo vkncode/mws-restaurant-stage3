@@ -8,14 +8,15 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 90 // Change this to your server port from 90
-    //return `http://localhost:${port}/data/restaurants.json`;
-    return `http://192.168.126.1:${port}/data/restaurants.json`;
+    const port = 1337// Point to Node development server running at 1337
+    return `http://localhost:${port}/restaurants`; // Calling Restaurants API to fetch data from the server
+    //return `http://192.168.126.1:${port}/data/restaurants.json`;
   }
 
   /**
    * Fetch all restaurants.
    */
+  /*
   static fetchRestaurants(callback) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', DBHelper.DATABASE_URL);
@@ -32,8 +33,35 @@ class DBHelper {
     xhr.send();
   }
 
+
+  */
+ /**
+  * TODO
+  *  New fetchRestaurants using fetch 
+  *  Get the restaurants from IDB first, if there are no restaturants in IDB
+  *  then Fetch and then store them in the IDB and also return the results
+ */
+static fetchRestaurants(callback) {
+  let fetchRestURL= DBHelper.DATABASE_URL;
+  
+  fetch(fetchRestURL, { method: 'GET'})
+    .then(
+      response => { //this is function(response)
+        response.json() //the response is restaurants json obj which again returns a promise
+          .then(restaurants => { //this is function(restaurants)
+            console.log("Restaurants JSON: ", restaurants);
+            callback(null, restaurants); //you are handling the jsondata here by passing it to the callback
+                                        //err is the first param of a callback , here we are handling the error , so passing null
+      });
+    })
+    .catch(error => {
+      callback('Fetch request failed, Returned status of ${error}', null);
+    });
+}
+
   /**
    * Fetch a restaurant by its ID.
+   * No change in stage2
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
@@ -53,6 +81,7 @@ class DBHelper {
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
+   * No change in stage 2
    */
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
@@ -69,6 +98,7 @@ class DBHelper {
 
   /**
    * Fetch restaurants by a neighborhood with proper error handling.
+   * No Change in stage2
    */
   static fetchRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
@@ -85,6 +115,7 @@ class DBHelper {
 
   /**
    * Fetch restaurants by a cuisine and a neighborhood with proper error handling.
+   * No Change in stage2
    */
   static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
@@ -105,7 +136,11 @@ class DBHelper {
   }
 
   /**
+   * TODO
    * Fetch all neighborhoods with proper error handling.
+   * Get the neighborhoods from IDB first.
+   * If there are no neighborhoods in IDB, then
+   * Fetch and then store it in the IDB
    */
   static fetchNeighborhoods(callback) {
     // Fetch all restaurants
@@ -124,6 +159,7 @@ class DBHelper {
 
   /**
    * Fetch all cuisines with proper error handling.
+   * No change in stage 2
    */
   static fetchCuisines(callback) {
     // Fetch all restaurants
@@ -151,7 +187,12 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    //Addding the if condition to check if there is a photograph attribute
+    //If not get it from the id attribute
+    if (restaurant.photograph){
+      return (`/img/${restaurant.photograph}.jpg`);
+    }
+    return (`/img/${restaurant.id}.jpg`);
   }
 
   /**
@@ -159,7 +200,10 @@ class DBHelper {
    * Restaurant Image file name
    */
   static imageFileNameOfRestaurant(restaurant) {
-    return (restaurant.photograph.slice(0,-4));
+    if (restaurant.photograph){
+      return (restaurant.photograph); //removing the slice , at this does not have the extension return (restaurant.photograph.slice(0,-4))
+    }
+    return (restaurant.id);
   }
 /**
  * TODO
