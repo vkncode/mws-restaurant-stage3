@@ -1,4 +1,67 @@
 /**
+ * IndexedDB functions
+ */
+/*
+function openDatabase() {
+  // If the browser doesn't support service worker,we dont have to have IDB
+  if (!navigator.serviceWorker) {
+    return Promise.resolve();
+  }
+
+  let dbPromise = idb.open('restaurantReview', 2, function(upgradeDb){
+    switch(upgradeDb.oldVersion) {
+      case 0:
+      case 1:
+          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+          //add the fetched restaurants to the idb
+          debugger;
+          addRestaurantsToIdb();
+          debugger;
+    }      
+  });
+  console.log("databaseopen",dbPromise);
+  return dbPromise;
+}
+*/
+let dbPromise = idb.open('restaurantReview', 2, function(upgradeDb){
+    switch(upgradeDb.oldVersion) {
+      case 0:
+      case 1:
+          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+          //add the fetched restaurants to the idb
+          debugger;
+          addRestaurantsToIdb();
+          debugger;
+    }      
+  });
+  console.log("databaseopen",dbPromise);
+ 
+function addRestaurantsToIdb(){
+  let fetchRestURL= DBHelper.DATABASE_URL;
+  fetch(fetchRestURL) // fetch the restaurants json
+  .then(function(response) {
+      return response.json();
+    }) //put the restaurants json into idb
+   .then(function(restaurants){
+          console.log("Restaurants JSON: ", restaurants);
+           dbPromise.then(function(db) {
+              if(!idb) return;
+              let tx = db.transaction('restaurants','readwrite');
+              let restaurantStore = tx.objectStore('restaurants');
+              for(let restaurant of restaurants){ //put each restaurant one by one into the idbstore
+                  restaurantStore.put(restaurant);
+                  console.log(`restaurant${restaurant}`);
+                }//end for
+            });//end function(db)
+            
+      })//end .then(function(restaurants)
+    .catch(function(error){
+      console.log(error);
+    });  
+}//end function addRestaurantsToIdb()
+
+
+/**
  * Common database helper functions.
  */
 class DBHelper {
@@ -13,28 +76,6 @@ class DBHelper {
     //return `http://192.168.126.1:${port}/data/restaurants.json`;
   }
 
-  /**
-   * Fetch all restaurants.
-   */
-  /*
-  static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
-  }
-
-
-  */
  /**
   * TODO
   *  New fetchRestaurants using fetch 
@@ -43,19 +84,21 @@ class DBHelper {
  */
 static fetchRestaurants(callback) {
   let fetchRestURL= DBHelper.DATABASE_URL;
-  
+  //let db = openDatabase();
+  addRestaurantsToIdb();
+  //console.log("indexeddb:",db);
   fetch(fetchRestURL, { method: 'GET'})
     .then(
       response => { //this is function(response)
         response.json() //the response is restaurants json obj which again returns a promise
           .then(restaurants => { //this is function(restaurants)
-            console.log("Restaurants JSON: ", restaurants);
+            //console.log("Restaurants JSON: ", restaurants);
             callback(null, restaurants); //you are handling the jsondata here by passing it to the callback
                                         //err is the first param of a callback , here we are handling the error , so passing null
       });
     })
     .catch(error => {
-      callback('Fetch request failed, Returned status of ${error}', null);
+      callback(`Fetch request failed, Returned status of ${error}`, null);
     });
 }
 
