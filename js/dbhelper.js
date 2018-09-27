@@ -1,41 +1,19 @@
 /**
  * IndexedDB functions
  */
-/*
-function openDatabase() {
-  // If the browser doesn't support service worker,we dont have to have IDB
-  if (!navigator.serviceWorker) {
-    return Promise.resolve();
-  }
+let dbPromise = idb.open('restaurantReview', 1, function(upgradeDb){
+    switch(upgradeDb.oldVersion) {
+      case 0:
+      case 1:
+          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+          //add the fetched restaurants to the idb
+          //addRestaurantsToIdb();
+         }      
+  });
+  console.log("databaseopen",dbPromise);
 
-  let dbPromise = idb.open('restaurantReview', 2, function(upgradeDb){
-    switch(upgradeDb.oldVersion) {
-      case 0:
-      case 1:
-          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
-          //add the fetched restaurants to the idb
-          debugger;
-          addRestaurantsToIdb();
-          debugger;
-    }      
-  });
-  console.log("databaseopen",dbPromise);
-  return dbPromise;
-}
+/* Function to add/put the restaurants json to Idb
 */
-let dbPromise = idb.open('restaurantReview', 2, function(upgradeDb){
-    switch(upgradeDb.oldVersion) {
-      case 0:
-      case 1:
-          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
-          //add the fetched restaurants to the idb
-          debugger;
-          addRestaurantsToIdb();
-          debugger;
-    }      
-  });
-  console.log("databaseopen",dbPromise);
- 
 function addRestaurantsToIdb(){
   let fetchRestURL= DBHelper.DATABASE_URL;
   fetch(fetchRestURL) // fetch the restaurants json
@@ -50,16 +28,29 @@ function addRestaurantsToIdb(){
               let restaurantStore = tx.objectStore('restaurants');
               for(let restaurant of restaurants){ //put each restaurant one by one into the idbstore
                   restaurantStore.put(restaurant);
-                  console.log(`restaurant${restaurant}`);
+                  //console.log(`restaurant${restaurant}`);
                 }//end for
             });//end function(db)
-            
+          //callback  
       })//end .then(function(restaurants)
     .catch(function(error){
       console.log(error);
     });  
 }//end function addRestaurantsToIdb()
 
+function readDB(callback) {
+  dbPromise.then(function(db) {
+    if(!idb) return;
+    let tx = db.transaction(['restaurants'], 'readonly');
+    let restaurantStore = tx.objectStore('restaurants');
+    console.log(restaurantStore.getAll());
+    callback (null,restaurantStore.getAll());
+  }).then(function(restaurants) {
+    // Use restaurants data
+    console.log(`why is it undefined ${restaurants}`);
+    return restaurants;
+  });
+}
 
 /**
  * Common database helper functions.
@@ -82,24 +73,53 @@ class DBHelper {
   *  Get the restaurants from IDB first, if there are no restaturants in IDB
   *  then Fetch and then store them in the IDB and also return the results
  */
+/*
+static readDB() {
+  dbPromise.then(function(db) {
+    if(!idb) return;
+    let tx = db.transaction(['restaurants'], 'readonly');
+    let restaurantStore = tx.objectStore('restaurants');
+    console.log(restaurantStore.getAll());
+  }).then(function(restaurants) {
+    // Use restaurants data
+    console.log(restaurants);
+    return restaurants;
+  });
+}
+*/
 static fetchRestaurants(callback) {
   let fetchRestURL= DBHelper.DATABASE_URL;
-  //let db = openDatabase();
-  addRestaurantsToIdb();
-  //console.log("indexeddb:",db);
-  fetch(fetchRestURL, { method: 'GET'})
-    .then(
-      response => { //this is function(response)
+  //Get the restaurants from IndexedDb
+  //getRestaurantsFromIdb();
+  //If there is nothing in IndexedDb then fetch from the server and also put it in the idb
+  /*dbPromise.then(function(db) {
+    if(!idb) return;
+    let tx = db.transaction(['restaurants'], 'readonly');
+    let restaurantStore = tx.objectStore('restaurants');
+    console.log(restaurantStore.getAll());
+  }).then(function(restaurants) {
+    // Use restaurants data
+    console.log(restaurants);
+    return restaurants;
+  }); */
+  readDB(callback);
+  if (!restaurants){
+    addRestaurantsToIdb();
+    fetch(fetchRestURL)
+    .then( function(response){
         response.json() //the response is restaurants json obj which again returns a promise
-          .then(restaurants => { //this is function(restaurants)
-            //console.log("Restaurants JSON: ", restaurants);
-            callback(null, restaurants); //you are handling the jsondata here by passing it to the callback
+          .then( function(restaurants){
+            callback(null, restaurants); //we are handling the jsondata here by passing it to the callback
                                         //err is the first param of a callback , here we are handling the error , so passing null
       });
     })
     .catch(error => {
       callback(`Fetch request failed, Returned status of ${error}`, null);
     });
+  }
+  
+  //console.log("indexeddb:",db);
+  
 }
 
   /**
