@@ -38,7 +38,7 @@ static addRestaurantsToIdb(){
       return response.json();
     }) //put the restaurants json into idb
    .then(function(restaurants){
-          console.log("Restaurants JSON: ", restaurants);
+          //console.log("Restaurants JSON: ", restaurants);
            dbPromise.then(function(db) {
               if(!idb) return;
               let tx = db.transaction('restaurants','readwrite');
@@ -61,11 +61,11 @@ static getRestaurantsFromIdb(callback) {
     if(!idb) return;
     let tx = db.transaction(['restaurants'], 'readonly');
     let restaurantStore = tx.objectStore('restaurants');
-    console.log(restaurantStore.getAll());
-    callback (null,restaurantStore.getAll());
+    //console.log(restaurantStore.getAll());
+    return restaurantStore.getAll();
   }).then(function(restaurants) {
     // Use restaurants data
-    console.log(`why is it undefined ${restaurants}`);
+    //console.log(`why is it undefined ${restaurants}`);
     return restaurants;
   });
 }//end function getRestaurantsFromIdb(callback)
@@ -78,23 +78,26 @@ static getRestaurantsFromIdb(callback) {
  */
 static fetchRestaurants(callback) {
   let fetchRestURL= DBHelper.DATABASE_URL;
-  //Get the restaurants from IndexedDb
-  DBHelper.getRestaurantsFromIdb(callback);
-  if (!restaurants){ //If there is nothing in IndexedDb then fetch from the server and also put it in the idb
-    DBHelper.addRestaurantsToIdb();
-    fetch(fetchRestURL)
+  //add the restaurants to idb and Fetch the restaurants from the server
+  //DBHelper.addRestaurantsToIdb();
+  fetch(fetchRestURL)
     .then( function(response){
+        DBHelper.addRestaurantsToIdb();
         return response.json() //the response is restaurants json obj which again returns a promise
           .then( function(restaurants){
+            //DBHelper.addRestaurantsToIdb(); //also add it to the idb
             callback(null, restaurants); //we are handling the jsondata here by passing it to the callback
                                         //err is the first param of a callback , here we are handling the error , so passing null
       });
     })
     .catch(error => {
+      //if the server is down..try in the idb
+      DBHelper.getRestaurantsFromIdb(callback);
+      if (!restaurants){ //If there is nothing in IndexedDb then fetch from the server and also put it in the idb
+        DBHelper.addRestaurantsToIdb();
+      }
       callback(`Fetch request failed, Returned status of ${error}`, null);
     });
-  }
-    //console.log("indexeddb:",db);
 }
 
   /**
