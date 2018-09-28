@@ -1,21 +1,38 @@
 /**
- * IndexedDB functions
+ * Common database helper functions.
  */
-let dbPromise = idb.open('restaurantReview', 1, function(upgradeDb){
-    switch(upgradeDb.oldVersion) {
-      case 0:
-      case 1:
-          upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
-          //add the fetched restaurants to the idb
-          //addRestaurantsToIdb();
-         }      
-  });
-  console.log("databaseopen",dbPromise);
+class DBHelper {
+
+  /**
+   * Database URL.
+   * Change this to restaurants.json file location on your server.
+   */
+  static get DATABASE_URL() {
+    const port = 1337// Point to Node development server running at 1337
+    return `http://localhost:${port}/restaurants`; // Calling Restaurants API to fetch data from the server
+    //return `http://192.168.126.1:${port}/data/restaurants.json`;
+  }
+
+  /* In openIndexedDb - we are creating the restaurantReview idb
+    we are opening the db and returning the Promise 
+ */
+static openIndexedDB(){
+  return idb.open('restaurantReview', 1, function(upgradeDb){
+  switch(upgradeDb.oldVersion) {
+    case 0:
+    case 1:
+        upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+        //add the fetched restaurants to the idb
+        //addRestaurantsToIdb();
+       }      
+   });
+}//end function openIndexedDB()
 
 /* Function to add/put the restaurants json to Idb
 */
-function addRestaurantsToIdb(){
+static addRestaurantsToIdb(){
   let fetchRestURL= DBHelper.DATABASE_URL;
+  let dbPromise = DBHelper. openIndexedDB();
   fetch(fetchRestURL) // fetch the restaurants json
   .then(function(response) {
       return response.json();
@@ -38,7 +55,8 @@ function addRestaurantsToIdb(){
     });  
 }//end function addRestaurantsToIdb()
 
-function readDB(callback) {
+static getRestaurantsFromIdb(callback) {
+  let dbPromise = DBHelper.openIndexedDB();
   dbPromise.then(function(db) {
     if(!idb) return;
     let tx = db.transaction(['restaurants'], 'readonly');
@@ -50,64 +68,23 @@ function readDB(callback) {
     console.log(`why is it undefined ${restaurants}`);
     return restaurants;
   });
-}
+}//end function getRestaurantsFromIdb(callback)
 
 /**
- * Common database helper functions.
- */
-class DBHelper {
-
-  /**
-   * Database URL.
-   * Change this to restaurants.json file location on your server.
-   */
-  static get DATABASE_URL() {
-    const port = 1337// Point to Node development server running at 1337
-    return `http://localhost:${port}/restaurants`; // Calling Restaurants API to fetch data from the server
-    //return `http://192.168.126.1:${port}/data/restaurants.json`;
-  }
-
- /**
   * TODO
   *  New fetchRestaurants using fetch 
   *  Get the restaurants from IDB first, if there are no restaturants in IDB
   *  then Fetch and then store them in the IDB and also return the results
  */
-/*
-static readDB() {
-  dbPromise.then(function(db) {
-    if(!idb) return;
-    let tx = db.transaction(['restaurants'], 'readonly');
-    let restaurantStore = tx.objectStore('restaurants');
-    console.log(restaurantStore.getAll());
-  }).then(function(restaurants) {
-    // Use restaurants data
-    console.log(restaurants);
-    return restaurants;
-  });
-}
-*/
 static fetchRestaurants(callback) {
   let fetchRestURL= DBHelper.DATABASE_URL;
   //Get the restaurants from IndexedDb
-  //getRestaurantsFromIdb();
-  //If there is nothing in IndexedDb then fetch from the server and also put it in the idb
-  /*dbPromise.then(function(db) {
-    if(!idb) return;
-    let tx = db.transaction(['restaurants'], 'readonly');
-    let restaurantStore = tx.objectStore('restaurants');
-    console.log(restaurantStore.getAll());
-  }).then(function(restaurants) {
-    // Use restaurants data
-    console.log(restaurants);
-    return restaurants;
-  }); */
-  readDB(callback);
-  if (!restaurants){
-    addRestaurantsToIdb();
+  DBHelper.getRestaurantsFromIdb(callback);
+  if (!restaurants){ //If there is nothing in IndexedDb then fetch from the server and also put it in the idb
+    DBHelper.addRestaurantsToIdb();
     fetch(fetchRestURL)
     .then( function(response){
-        response.json() //the response is restaurants json obj which again returns a promise
+        return response.json() //the response is restaurants json obj which again returns a promise
           .then( function(restaurants){
             callback(null, restaurants); //we are handling the jsondata here by passing it to the callback
                                         //err is the first param of a callback , here we are handling the error , so passing null
@@ -117,9 +94,7 @@ static fetchRestaurants(callback) {
       callback(`Fetch request failed, Returned status of ${error}`, null);
     });
   }
-  
-  //console.log("indexeddb:",db);
-  
+    //console.log("indexeddb:",db);
 }
 
   /**
