@@ -7,10 +7,14 @@ class DBHelper {
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
-  static get DATABASE_URL() {
+  static DATABASE_URL(id) {
     const port = 1337// Point to Node development server running at 1337
-    return `http://localhost:${port}/restaurants`; // Calling Restaurants API to fetch data from the server
-    //return `http://192.168.126.1:${port}/data/restaurants.json`;
+    if (!id) {
+        return `http://localhost:${port}/restaurants`; // Calling Restaurants API to fetch data from the server
+      //return `http://192.168.126.1:${port}/data/restaurants.json`;
+    } else{
+            return `http://localhost:${port}/restaurants/${id}`;
+    }
   }
 
   /* In openIndexedDb - we are creating the restaurantReview idb
@@ -31,7 +35,7 @@ static openIndexedDB(){
 /* Function to add/put the restaurants json to Idb
 */
 static addRestaurantsToIdb(){
-  let fetchRestURL= DBHelper.DATABASE_URL;
+  let fetchRestURL= DBHelper.DATABASE_URL();
   let dbPromise = DBHelper. openIndexedDB();
   fetch(fetchRestURL) // fetch the restaurants json
   .then(function(response) {
@@ -66,7 +70,9 @@ static getRestaurantsFromIdb(callback) {
   }).then(function(restaurants) {
     // Use restaurants data
     //console.log(`why is it undefined ${restaurants}`);
+    callback(null,restaurants);
     return restaurants;
+   
   });
 }//end function getRestaurantsFromIdb(callback)
 
@@ -77,7 +83,7 @@ static getRestaurantsFromIdb(callback) {
   *  then Fetch and then store them in the IDB and also return the results
  */
 static fetchRestaurants(callback) {
-  let fetchRestURL= DBHelper.DATABASE_URL;
+  let fetchRestURL= DBHelper.DATABASE_URL();
   //add the restaurants to idb and Fetch the restaurants from the server
   //DBHelper.addRestaurantsToIdb();
   fetch(fetchRestURL)
@@ -215,6 +221,23 @@ static fetchRestaurants(callback) {
         callback(null, uniqueCuisines);
       }
     });
+  }
+
+  static fetchRestaurantReview(id,callback){
+    let fetchReviewsURL= "http://localhost:1337/reviews/?restaurant_id=" + id;
+    //add the restaurants to idb and Fetch the restaurants from the server
+    //DBHelper.addRestaurantsToIdb();
+    fetch(fetchReviewsURL).then(function(response) {
+                response.json().then(function(response){
+                                let reviews = response;
+                                console.log(reviews);
+                                callback(null,reviews);
+                                
+                });
+    });
+   /* fetch("http://localhost:1337/reviews/?restaurant_id=" + id)
+   
+   */
   }
 
   /**

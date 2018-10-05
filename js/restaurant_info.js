@@ -72,8 +72,21 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
-}
+  /* TODO
+     Pass the restaurant id to the reviews server and fill the reviews
+     following just like self.restaurant.operating_hours
+     and fetchCuisines (in main.js)
+   */
+  const id = self.restaurant.id;
+  DBHelper.fetchRestaurantReview(id, (error,reviews) => {
+    self.reviews = reviews;
+    // fill reviews
+  fillReviewsHTML(reviews);
+  });
+      
+   
+ 
+};
 
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
@@ -98,7 +111,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews = self.reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
