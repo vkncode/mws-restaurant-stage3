@@ -44,7 +44,29 @@
         <table tabIndex=0 id="restaurant-hours"></table>
       </section>
       <!-- end restaurant -->
-       
+       <!-- Beginning ReviewAdd container -->
+       <section id="reviewAdd-container">
+         <h2 id="reviewAdd">Add Review</h2>
+         <form id="reviewAdd-form">
+           <label for="user-name">User Name:</label></br>
+           <input type="text" name="name" id="user-name">
+           <div class="rating-options">
+             <p>Rating:</p>
+             <select id="rating-select" name="rating" aria-label="Select Rating">
+               <option value="1">1</option>
+               <option value="2">2</option>
+               <option value="3">3</option>
+               <option value="4">4</option>
+               <option value="5">5</option>
+             </select>
+            </div> 
+             <label for="review-comments">Comments:</label></br>
+             <textarea id="review-comments" name="comments"></textarea></br>
+            <div id="for-error-capture"></div>
+            <button class="submit-button" onClick="addReview()">Add Review</button>
+          </form>
+       </section>
+       <!-- End ReviewAdd container -->
       <!-- Beginning reviews -->
       <section id="reviews-container">
         <ul tabIndex=0 id="reviews-list"></ul>
