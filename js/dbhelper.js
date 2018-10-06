@@ -19,17 +19,22 @@ class DBHelper {
 
   /* In openIndexedDb - we are creating the restaurantReview idb
     we are opening the db and returning the Promise 
+    **In stage 3 we are creating the reviewsStore -objectstore in our idb
+    *Also setting up the index to resturant_id in reviews(as id here is review id)
  */
 static openIndexedDB(){
-  return idb.open('restaurantReview', 1, function(upgradeDb){
-  switch(upgradeDb.oldVersion) {
-    case 0:
-    case 1:
-        upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
-        //add the fetched restaurants to the idb
-        //addRestaurantsToIdb();
-       }      
-   });
+  return idb.open('restaurantReview', 3, function(upgradeDb){
+      switch(upgradeDb.oldVersion) {
+          case 0:
+          case 1:
+            upgradeDb.createObjectStore('restaurants', {keyPath: 'id'});
+            //add the fetched restaurants to the idb
+            //addRestaurantsToIdb();
+          case 2:
+            const reviewStore = upgradeDb.createObjectStore('reviews', {keyPath: 'id'});
+            reviewStore.createIndex('reviewStore','restaurant_id');
+      }      
+  });
 }//end function openIndexedDB()
 
 /* Function to add/put the restaurants json to Idb
@@ -223,6 +228,52 @@ static fetchRestaurants(callback) {
     });
   }
 
+/**
+ * In stage3 we are creating this function addReviewsToIdb
+ * we are adding the reviews to reviewstore in idb
+ */
+static addReviewsToIdb(reviews){
+  console.log(reviews);
+  let dbPromise = DBHelper. openIndexedDB();
+  dbPromise.then(function(db) {
+    if(!idb) return;
+    let tx = db.transaction('reviews','readwrite');
+    let reviewStore = tx.objectStore('reviews');
+    for(let review of reviews){ //put each review one by one into the idbstore
+      reviewStore.put(review);
+        //console.log(`restaurant${restaurant}`);
+      }//end for
+  });
+}
+
+/**
+ * In stage 3 we are creating the function getReviewsFromIdb
+ * When the server is down we try to get the reviwes from the idb obj store
+ */
+static getReviewsFromIdb(id,callback) {
+  let dbPromise = DBHelper.openIndexedDB();
+  dbPromise.then(function(db) {
+    if(!idb) return;
+    //let tx = db.transaction(['reviews'], 'readonly');
+    //let reviewStore = tx.objectStore('reviews');
+    const reviewIndex = db.transaction('reviews', 'readwrite')
+        .objectStore('reviews').index('reviewStore');
+      console.log(reviewIndex.getAll(id));
+      return reviewIndex.getAll(id);
+  }).then(function(reviews) {
+    // Use reviews data
+    callback(null,reviews);
+    return reviews;
+   
+  });
+}//end function getRestaurantsFromIdb(callback)
+
+
+/**
+ * In stage 3 we are creating this function to fetch the reviews from reviews json
+ * we put it in the idb.Here the id is the restaurant id
+ * if server is down we try to get it from idb
+ */
   static fetchRestaurantReview(id,callback){
     let fetchReviewsURL= "http://localhost:1337/reviews/?restaurant_id=" + id;
     //add the restaurants to idb and Fetch the restaurants from the server
@@ -230,14 +281,20 @@ static fetchRestaurants(callback) {
     fetch(fetchReviewsURL).then(function(response) {
                 response.json().then(function(response){
                                 let reviews = response;
+                                DBHelper.addReviewsToIdb(reviews);
                                 console.log(reviews);
                                 callback(null,reviews);
                                 
+                                
                 });
+    }).catch(error => {
+                      //if the server is down..try in the idb
+                      DBHelper.getReviewsFromIdb(id,callback);
+                      if (!reviews){ //If there is nothing in IndexedDb then fetch from the server and also put it in the idb
+                        DBHelper.addReviewsToIdb();
+                      }
+      callback(`Fetch request failed, Returned status of ${error}`, null);
     });
-   /* fetch("http://localhost:1337/reviews/?restaurant_id=" + id)
-   
-   */
   }
 
   /**
