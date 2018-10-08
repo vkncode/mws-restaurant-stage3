@@ -1,3 +1,5 @@
+//Following along the lines of proj3 walkthrough webinar by lorenzo and Elisa
+
 /**
  * Common database helper functions.
  */
@@ -229,6 +231,20 @@ static fetchRestaurants(callback) {
   }
 
 /**
+ * In stage3 we are creating this function to test
+ * the status of the server
+ */
+static testServer(){
+  const reviewsUrl="http://localhost:1337/reviews";
+  fetch(reviewsUrl,{method: 'head'}).then(function(response) {
+    console.dir(response);
+  })
+  .catch(function(error){
+    console.log("I am down : server down :",error);
+  })
+}
+
+/**
  * In stage3 we are creating this function addReviewsToIdb
  * we are adding the reviews to reviewstore in idb
  */
@@ -267,6 +283,80 @@ static getReviewsFromIdb(id,callback) {
    
   });
 }//end function getRestaurantsFromIdb(callback)
+
+/**
+ * In stage3 we are creating this function to add reviews to the server
+ * If offline we package the review into a offline data object 
+ * and send it to another function for processing
+ */
+static addReview(newReview){
+  //Make an offline object
+  let newReviewOffline ={
+      name: 'addReview',
+      data: newReview,
+      object_type: 'review'
+  };
+  //Now check if the server is online
+  //If offline send this offline obj for later processing
+  //if(!navigator.onLine && (newReviewOffline.name === 'addReview')){
+  //my navigator returns true even when server is down
+  //this is also not working
+  //if((serverStatus === false) && (newReviewOffline.name === 'addReview')){
+  let serverStatus = DBHelper.testServer();
+  console.log('Server status : ',serverStatus);
+ 
+  if(!navigator.onLine && (newReviewOffline.name === 'addReview')){
+        DBHelper.addReviewOnOnline(newReviewOffline);
+        return;
+  }
+
+  let myRequest = "http://localhost:1337/reviews";
+  let myFetchInit = {
+    method: 'POST',
+    body: JSON.stringify(newReview),//this is the form data
+    headers: new Headers({'Content-Type':'application/json'})
+  };
+  fetch(myRequest,myFetchInit).then(function(response) {
+    let contentType = response.headers.get("content-type");
+    if(contentType && contentType.includes("application/json")) {
+      return response.json();
+    }
+    throw new TypeError("Oops, we haven't got JSON!");
+  })
+  .then(function(json) { console.log("Post successful");/* process your JSON further */ })
+  .catch(function(error) { console.log('fetch error',error); });
+} // end addReview function
+
+/**
+ * In satge 3 we are creating the fn addReviewOnOnline(newReviewOffline)
+ * to store the user data when offline and post it when online
+ */
+static addReviewOnOnline(newReviewOffline){
+  console.log('offline object :', newReviewOffline);
+  //storing the offline review object in localstorage
+  localStorage.setItem('data',JSON.stringify(newReviewOffline.data));
+  //let serverStatus = DBHelper.testServer();
+  //add event listener to run in background to check is server is online
+  window.addEventListener('online',function(event){
+    //if(serverStatus === true){
+      console.log('I am back : server online!')
+      let data = JSON.parse(localStorage.getItem('data'));
+      //do this part later --update the UI
+      //if online send the data to server
+      if(data !== null){
+        console.log(data);
+        if(newReviewOffline.name ==='addReview'){
+          console.log(newReviewOffline.data);
+          DBHelper.addReview(newReviewOffline.data);
+        }
+        //now remove it from local storage
+        localStorage.removeItem(newReviewOffline.data);
+        console.log(newReviewOffline.data ,': removed')
+  
+      }//if data
+    //}//if test server
+  });//end event listener fn
+} // end addReviewOnOnline(newReviewOffline) function
 
 
 /**

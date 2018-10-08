@@ -83,10 +83,40 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     // fill reviews
   fillReviewsHTML(reviews);
   });
-      
-   
- 
 };
+
+/**
+ * In stage3 we create the addReview() function 
+ * (following just like the other functions written here)
+ * this is called on click of the addReview button
+ * we get all the form objects here and pass it to dbhelper
+ */
+addReview = () => {
+  event.preventDefault(); //to prevent the default click event of the button
+  let restaurant_id = getParameterByName('id');
+  let name = document.getElementById('user-name').value;
+  let rating = document.getElementById('rating-select').value;
+  let comments = document.getElementById('review-comments').value;
+  let user_review = [restaurant_id,name,rating,comments];
+  console.log(user_review);
+  // Map the user-review array to the json review obj of the server
+  //we will use it to send it to dbhelper and also to show it on the restaurant page
+  const newReview = {
+    restaurant_id: parseInt(user_review[0]),
+    name: user_review[1],
+    //converting the date to unix timestamp
+    createdAt: parseInt((new Date().getTime() / 1000).toFixed(0)),
+    updatedAt: parseInt((new Date().getTime() / 1000).toFixed(0)),
+    //rating: parseInt(user_review[2].substring(0,300)),
+    rating: parseInt(user_review[2]),
+    comments: user_review[3],
+   
+  };
+  console.log(newReview);
+  DBHelper.addReview(newReview);
+  //addReviewOnPage(newReview);
+  document.getElementById('reviewAdd-form').reset();
+}
 
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
@@ -141,7 +171,15 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  let reviewDate = review.createdAt;
+  reviewDate = new Date(reviewDate*1000);
+ // coverting the unix timestamp to normal date;
+ //need to work on this (not sure if this is displaying right)
+  let hours = reviewDate.getHours();
+  let minutes = "0" + reviewDate.getMinutes();
+  let seconds = "0" + reviewDate.getSeconds();
+  reviewDate = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+  date.innerHTML = reviewDate;
   li.tabIndex = 0;
   li.appendChild(date);
 
