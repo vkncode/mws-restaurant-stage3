@@ -43,7 +43,7 @@ static openIndexedDB(){
 */
 static addRestaurantsToIdb(){
   let fetchRestURL= DBHelper.DATABASE_URL();
-  let dbPromise = DBHelper. openIndexedDB();
+  let dbPromise = DBHelper.openIndexedDB();
   fetch(fetchRestURL) // fetch the restaurants json
   .then(function(response) {
       return response.json();
@@ -101,7 +101,7 @@ static fetchRestaurants(callback) {
             //DBHelper.addRestaurantsToIdb(); //also add it to the idb
             callback(null, restaurants); //we are handling the jsondata here by passing it to the callback
                                         //err is the first param of a callback , here we are handling the error , so passing null
-      });
+      })
     })
     .catch(error => {
       //if the server is down..try in the idb
@@ -110,7 +110,8 @@ static fetchRestaurants(callback) {
         DBHelper.addRestaurantsToIdb();
       }
       callback(`Fetch request failed, Returned status of ${error}`, null);
-    });
+    });  
+   
 }
 
   /**
@@ -236,13 +237,19 @@ static fetchRestaurants(callback) {
  */
 static testServer(){
   const reviewsUrl="http://localhost:1337/reviews";
-  fetch(reviewsUrl,{method: 'head'}).then(function(response) {
-    console.dir(response);
+  return fetch(reviewsUrl).then(function(response) {
+    console.dir(response.ok); // returns true if the response returned successfully
+    return true;
   })
   .catch(function(error){
-    console.log("I am down : server down :",error);
-  })
-}
+      console.log("I am down : server down :",error);
+      return false;
+    });//end catch
+  
+  return false;
+}//end testServer
+
+
 
 /**
  * In stage3 we are creating this function addReviewsToIdb
@@ -250,7 +257,7 @@ static testServer(){
  */
 static addReviewsToIdb(reviews){
   console.log(reviews);
-  let dbPromise = DBHelper. openIndexedDB();
+  let dbPromise = DBHelper.openIndexedDB();
   dbPromise.then(function(db) {
     if(!idb) return;
     let tx = db.transaction('reviews','readwrite');
@@ -368,6 +375,8 @@ static addReviewOnOnline(newReviewOffline){
     let fetchReviewsURL= "http://localhost:1337/reviews/?restaurant_id=" + id;
     //add the restaurants to idb and Fetch the restaurants from the server
     //DBHelper.addRestaurantsToIdb();
+    let serverStatus = DBHelper.testServer();
+    console.log("Testing the server status: ",serverStatus);
     fetch(fetchReviewsURL).then(function(response) {
                 response.json().then(function(response){
                                 let reviews = response;
