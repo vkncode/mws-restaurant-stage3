@@ -244,17 +244,19 @@ class DBHelper {
   static testServer() {
     const reviewsUrl = "http://localhost:1337/reviews";
     return fetch(reviewsUrl).then(function (response) {
-      console.dir(response.ok); // returns true if the response returned successfully
-      return response.ok;
-    })
-      .catch(function (error) {
+      if(response.ok){
+        console.dir(response.ok); // returns true if the response returned successfully
+        return true;
+      } else{
+        return false;
+      }
+    }).catch(function (error) {
         console.log("I am down : server down :", error);
         return false;
       });//end catch
-
     return false;
   }//end testServer
-
+  
   /**
    * In stage3 we are creating this function addReviewsToIdb
    * we are adding the reviews to reviewstore in idb

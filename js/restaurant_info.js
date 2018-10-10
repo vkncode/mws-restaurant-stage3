@@ -175,10 +175,13 @@ createReviewHTML = (review) => {
   reviewDate = new Date(reviewDate*1000);
  // coverting the unix timestamp to normal date;
  //need to work on this (not sure if this is displaying right)
-  let hours = reviewDate.getHours();
+ /* let hours = reviewDate.getHours();
   let minutes = "0" + reviewDate.getMinutes();
-  let seconds = "0" + reviewDate.getSeconds();
-  reviewDate = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+  let seconds = "0" + reviewDate.getSeconds(); */
+  let day = reviewDate.getDate();
+  let month = reviewDate.getMonth();
+  let year = reviewDate.getYear();
+  reviewDate = month + ':' + day + ':' + year;
   date.innerHTML = reviewDate;
   li.tabIndex = 0;
   li.appendChild(date);
