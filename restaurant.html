@@ -7,6 +7,9 @@
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <!-- Main CSS file -->
   <link rel="stylesheet" href="css/styles.css" type="text/css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#3367D6"/>
+  <meta name="Description" content="Restaurant Information page">
   <title>Restaurant Info</title>
 </head>
 
@@ -50,7 +53,7 @@
        <!-- Beginning ReviewAdd container -->
        <section id="reviewAdd-container">
          <h2 id="reviewAdd">Add Review</h2>
-         <form id="reviewAdd-form">
+         <form id="reviewAdd-form" aria-label="Add a review form">
            <label for="user-name">Your Name:</label></br>
            <input type="text" name="name" id="user-name"></br></br>
            <div class="rating-options">

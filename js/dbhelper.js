@@ -1,4 +1,5 @@
-//Following along the lines of proj3 walkthrough webinar by lorenzo and Elisa
+//Following along the lines of proj3 walkthrough webinar by lorenzo and Elisa,
+//google search, stack overflow and google developer works examples
 //just checking ..take it off later
 window.addEventListener('offline', function (event) {
   console.log("You lost connection.");
@@ -313,12 +314,12 @@ class DBHelper {
      * If offline send this offline obj for later processing
     */
     if(!navigator.onLine && (newReviewOffline.name ==='addReview')){
-      DBHelper.testServer().then(status => {
-        if(status === false) {
+      //DBHelper.testServer().then(status => {
+        //if(status === false) {
           DBHelper.addReviewOnOnline(newReviewOffline);
           return;
-        }
-      });  
+        //}
+      //});  
     };
     let myRequest = "http://localhost:1337/reviews";
     let myFetchInit = {
@@ -462,9 +463,11 @@ static updateFavoriteStatusToIdb(id,favoriteStatus) {
     //Addding the if condition to check if there is a photograph attribute
     //If not get it from the id attribute
     if (restaurant.photograph) {
-      return (`/img/${restaurant.photograph}.jpg`);
+      //return (`/img/${restaurant.photograph}.jpg`);
+      return (`/img/${restaurant.photograph}.webp`);
     }
-    return (`/img/${restaurant.id}.jpg`);
+    //return (`/img/${restaurant.id}.jpg`);
+    return (`/img/${restaurant.id}.webp`);
   }
 
   /**

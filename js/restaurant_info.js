@@ -76,7 +76,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   
   const imgFileName = DBHelper.imageFileNameOfRestaurant(restaurant);// Just the Image name without extension
   const cropImgPath = '/destimg'; // Folder where the cropped images are
-  image.srcset = (`${cropImgPath}/${imgFileName}_medium.jpg 1000w, ${cropImgPath}/${imgFileName}_small.jpg 500w`);
+  //image.srcset = (`${cropImgPath}/${imgFileName}_medium.jpg 1000w, ${cropImgPath}/${imgFileName}_small.jpg 500w`);
+  image.srcset = (`${cropImgPath}/${imgFileName}_medium.webp 1000w, ${cropImgPath}/${imgFileName}_small.webp 500w`);
   image.alt = DBHelper.imageAltForRestaurant(restaurant);
 
   const cuisine = document.getElementById('restaurant-cuisine');

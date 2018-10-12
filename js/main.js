@@ -150,9 +150,12 @@ createRestaurantHTML = (restaurant) => {
   image.tabIndex = 0;
   const imgFileName = DBHelper.imageFileNameOfRestaurant(restaurant); // Just the Image name without extension
   //Large,Medium and Small Image path
-  const imgLarge = (`${cropImgPath}/${imgFileName}_large.jpg`);
-  const imgMedium = (`${cropImgPath}/${imgFileName}_medium.jpg`);
-  const imgSmall = (`${cropImgPath}/${imgFileName}_small.jpg`);
+  //const imgLarge = (`${cropImgPath}/${imgFileName}_large.jpg`);
+  //const imgMedium = (`${cropImgPath}/${imgFileName}_medium.jpg`);
+  //const imgSmall = (`${cropImgPath}/${imgFileName}_small.jpg`);
+  const imgLarge = (`${cropImgPath}/${imgFileName}_large.webp`);
+  const imgMedium = (`${cropImgPath}/${imgFileName}_medium.webp`);
+  const imgSmall = (`${cropImgPath}/${imgFileName}_small.webp`);
   //3 different viewports - 3 different media attribute for source
   const mediaLarge = '(min-width: 960px)';
   const mediaMedium = '(min-width: 600px)';
