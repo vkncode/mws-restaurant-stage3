@@ -352,6 +352,12 @@ class DBHelper {
           console.log('I am back : server online!')
           let data = JSON.parse(localStorage.getItem('data'));
           //do this part later --update the UI
+          //using the spread operator since there can be 0 or more .offline objs
+          [...document.querySelectorAll(".offline")]
+          .forEach(element => {
+              element.classList.remove("offline")
+              element.querySelector(".offlineLabel").remove()
+          });
           //if online send the data to server
           if (data !== null) {
             console.log(data);
@@ -394,6 +400,54 @@ class DBHelper {
     });
   }
 
+/**
+ * In stage 3 we create the function updateFavoriteStatus
+ */
+static updateFavoriteStatus(id,favoriteStatus){
+  console.log(`restaurant_id :${id} , favorite status : ${favoriteStatus}`);
+  let myRequest = `http://localhost:1337/restaurants/${id}/?is_favorite=${favoriteStatus}`;
+  fetch(myRequest,{method: 'PUT'})
+  .then(function (response) {
+    console.log("Changed favorite status successfully")
+    DBHelper.updateFavoriteStatusToIdb(id,favoriteStatus);
+  })
+  .catch(function (error) { console.log('fetch error', error); });
+}
+
+/**
+ * In stage 3 we create the function updateFavoriteStatusToIdb
+ */
+static updateFavoriteStatusToIdb(id,favoriteStatus) {
+  //console.log(reviews);
+  let dbPromise = DBHelper.openIndexedDB();
+  dbPromise.then(function (db) {
+    if (!idb) return;
+    let tx = db.transaction('restaurants', 'readwrite');
+    let restaurantStore = tx.objectStore('restaurants');
+    restaurantStore.get(id)
+    .then(function(restaurant){
+      restaurant.is_favorite = favoriteStatus;
+      restaurantStore.put(restaurant);
+    })
+    .catch(function(error){
+      console.log('idb operation error', error);
+    });
+    
+  });
+}
+
+/**
+   * Restaurant favorite stats URL.
+   */
+  static favoriteStatusForRestaurant(restaurant) {
+    //Addding the if condition to check if there is a is_favorite attribute
+    //If not just return false
+    if (restaurant.is_favorite) {
+      return (restaurant.is_favorite);
+    }
+    return (false);
+  }
+
   /**
    * Restaurant page URL.
    */
@@ -431,6 +485,21 @@ class DBHelper {
     return (restaurant.alt);
   }
 
+  static setRedHeart(favorite,favoriteHeartYes){
+    favorite.innerHTML = favoriteHeartYes;
+    favorite.style.color ='red';
+    favorite.style.borderColor = 'red';
+    favorite.setAttribute('aria-label','set as favorite');
+    
+  }
+  
+  static setBlackHeart(favorite,favoriteHeartNo){
+    favorite.style.color ='black';
+    favorite.style.borderColor = 'white'
+    favorite.innerHTML = favoriteHeartNo;
+    favorite.setAttribute('aria-label','remove favorite status');
+    
+  }
 
   /**
    * Map marker for a restaurant.

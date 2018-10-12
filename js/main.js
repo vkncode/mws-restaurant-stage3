@@ -178,6 +178,37 @@ createRestaurantHTML = (restaurant) => {
   name.tabIndex = 0;
   li.append(name);
 
+  /**
+   * Adding the favorites button in stage 3
+   */
+const favorite = document.createElement('button');
+const favoriteHeartNo = '\u2661';
+const favoriteHeartYes = '\u2665';
+//get the current restaurant status
+let favoriteStatus = DBHelper.favoriteStatusForRestaurant(restaurant);
+console.log(`favorite status: ${favoriteStatus}`);
+if(favoriteStatus === 'true'){
+  DBHelper.setRedHeart(favorite,favoriteHeartYes);
+}
+else{
+  DBHelper.setBlackHeart(favorite,favoriteHeartNo);
+}
+favorite.tabIndex = 0;
+//toggle the status on click
+favorite.addEventListener('click', toggle);
+function toggle() {
+  const like = favorite.innerHTML;
+  if(like==favoriteHeartNo) {
+    DBHelper.setRedHeart(favorite,favoriteHeartYes);
+    favoriteStatus = true;
+  } else {
+    DBHelper.setBlackHeart(favorite,favoriteHeartNo);
+    favoriteStatus = false;
+  }
+  DBHelper.updateFavoriteStatus(restaurant.id,favoriteStatus);
+}
+li.append(favorite);
+
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
   neighborhood.tabIndex = 0;
@@ -196,6 +227,21 @@ createRestaurantHTML = (restaurant) => {
   return li
 }
 
+/*function setRedHeart(favorite,favoriteHeartYes){
+  favorite.innerHTML = favoriteHeartYes;
+  favorite.style.color ='red';
+  favorite.style.borderColor = 'red';
+  favorite.setAttribute('aria-label','set as favorite');
+  
+}
+
+function setBlackHeart(favorite,favoriteHeartNo){
+  favorite.style.color ='black';
+  favorite.style.borderColor = 'white'
+  favorite.innerHTML = favoriteHeartNo;
+  favorite.setAttribute('aria-label','remove favorite status');
+  
+}*/
 /**
  * Add markers for current restaurants to the map.
  */

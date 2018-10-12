@@ -51,6 +51,21 @@ fetchRestaurantFromURL = (callback) => {
 fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
+  
+  const favorite = document.getElementById('favorite');
+  const favoriteHeartNo = '\u2661';
+  const favoriteHeartYes = '\u2665';
+  //get the current restaurant status
+  let favoriteStatus = DBHelper.favoriteStatusForRestaurant(restaurant);
+  console.log(`favorite status: ${favoriteStatus}`);
+  if(favoriteStatus === 'true'){
+    DBHelper.setRedHeart(favorite,favoriteHeartYes);
+  }
+  else{
+    DBHelper.setBlackHeart(favorite,favoriteHeartNo);
+  }
+  favorite.tabIndex = 0;
+ 
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
@@ -86,6 +101,27 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 };
 
 /**
+ * Create restaurant operating hours HTML table and add it to the webpage.
+ */
+fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => {
+  const hours = document.getElementById('restaurant-hours');
+  for (let key in operatingHours) {
+    const row = document.createElement('tr');
+
+    const day = document.createElement('td');
+    day.innerHTML = key;
+    row.appendChild(day);
+
+    const time = document.createElement('td');
+    time.innerHTML = operatingHours[key];
+    row.appendChild(time);
+
+    hours.appendChild(row);
+  }
+}
+
+
+/**
  * In stage3 we create the addReview() function 
  * (following just like the other functions written here)
  * this is called on click of the addReview button
@@ -105,37 +141,19 @@ addReview = () => {
     restaurant_id: parseInt(user_review[0]),
     name: user_review[1],
     //converting the date to unix timestamp
-    createdAt: parseInt((new Date().getTime() / 1000).toFixed(0)),
-    updatedAt: parseInt((new Date().getTime() / 1000).toFixed(0)),
+    //createdAt: parseInt((new Date().getTime() / 1000).toFixed(0)),
+    //updatedAt: parseInt((new Date().getTime() / 1000).toFixed(0)),
     //rating: parseInt(user_review[2].substring(0,300)),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     rating: parseInt(user_review[2]),
     comments: user_review[3],
    
   };
   console.log(newReview);
   DBHelper.addReview(newReview);
-  //addReviewOnPage(newReview);
+  showNewReviewHTML(newReview);
   document.getElementById('reviewAdd-form').reset();
-}
-
-/**
- * Create restaurant operating hours HTML table and add it to the webpage.
- */
-fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => {
-  const hours = document.getElementById('restaurant-hours');
-  for (let key in operatingHours) {
-    const row = document.createElement('tr');
-
-    const day = document.createElement('td');
-    day.innerHTML = key;
-    row.appendChild(day);
-
-    const time = document.createElement('td');
-    time.innerHTML = operatingHours[key];
-    row.appendChild(time);
-
-    hours.appendChild(row);
-  }
 }
 
 /**
@@ -159,29 +177,52 @@ fillReviewsHTML = (reviews = self.reviews) => {
   });
   container.appendChild(ul);
 }
+/**
+ * show the new new added review
+ */
+ showNewReviewHTML = (reviews = newReview) => {
+  const container = document.getElementById('reviews-container');
+  /*const title = document.createElement('h2');
+  title.innerHTML = 'Reviews';
+  container.appendChild(title);*/
+
+  if (!reviews) {
+    //const noReviews = document.createElement('p');
+    //noReviews.innerHTML = 'No reviews yet!';
+    //container.appendChild(noReviews);
+    return;
+  }
+  const ul = document.getElementById('reviews-list');
+  ul.appendChild(createReviewHTML(reviews));
+  container.appendChild(ul);
+}
 
 /**
  * Create review HTML and add it to the webpage.
  */
 createReviewHTML = (review) => {
   const li = document.createElement('li');
+  if(!navigator.onLine){
+    const serverStatus = document.createElement('p')
+    serverStatus.classList.add('offlineLabel')
+    serverStatus.innerHTML = "OFFLINE"
+    serverStatus.style.color = 'red'
+    li.classList.add("offline")
+    li.appendChild(serverStatus);
+  }
   const name = document.createElement('p');
   name.innerHTML = review.name;
   li.tabIndex = 0;
   li.appendChild(name);
-
+ 
   const date = document.createElement('p');
   let reviewDate = review.createdAt;
-  reviewDate = new Date(reviewDate*1000);
+  reviewDate = new Date(reviewDate).toLocaleString();
  // coverting the unix timestamp to normal date;
- //need to work on this (not sure if this is displaying right)
- /* let hours = reviewDate.getHours();
-  let minutes = "0" + reviewDate.getMinutes();
-  let seconds = "0" + reviewDate.getSeconds(); */
-  let day = reviewDate.getDate();
-  let month = reviewDate.getMonth();
-  let year = reviewDate.getYear();
-  reviewDate = month + ':' + day + ':' + year;
+  //let day = reviewDate.getDate();
+  //let month = reviewDate.getMonth();
+  //let year = reviewDate.getYear();
+  //reviewDate = month + ':' + day + ':' + year;
   date.innerHTML = reviewDate;
   li.tabIndex = 0;
   li.appendChild(date);

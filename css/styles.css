@@ -138,6 +138,16 @@ nav h1 a {
   padding: 0 10px;
   width: 200px;
 }
+/* ====================== Favorites selection ====================== */
+.favorite-yes {
+  color: 'red';
+  border-color: 'red' 
+ }
+ .favorite-no {
+  color: 'black';
+  border-color: 'white'
+ }
+
 
 /* ====================== Restaurant Listing ====================== */
 #restaurants-list {
@@ -274,9 +284,13 @@ nav h1 a {
   margin: 0;
   padding: 0;
 }
+#offlineLabel, #offline {
+  color: #f50000;
+  font-size: 20pt;
+}
 #reviews-list li {
   background-color: #fff;
-    border: 2px solid #f3f3f3;
+  border: 2px solid #f3f3f3;
   display: block;
   list-style-type: none;
   margin: 0 0 30px;
